@@ -38,6 +38,7 @@ venv.bak/
 
 # pipenv / poetry
 pip-wheel-metadata
+*.lock
 # Root .gitignore for repo with backend/ (FastAPI) and frontend/ (React)
 
 # Python artifacts (backend/)
@@ -187,7 +188,7 @@ logs/
 .vscode/settings.json
 
 # Monorepo-specific: ignore per-package lockfiles if you prefer single root lockfile
-# frontend/package-lock.json
+frontend/package-lock.json
 # backend/package-lock.json
 
 # Keep the following files tracked (examples/configs) by not ignoring them:
