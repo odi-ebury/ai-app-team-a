@@ -4,7 +4,6 @@
 - Tailwind CSS 4
 - TanStack React Query 5 (server state)
 - React Router 7 (routing)
-- Web MediaRecorder API (audio capture)
 
 ## Project Structure
 
@@ -43,13 +42,6 @@ src/
 5. Add route in `src/App.tsx`
 6. For reusable UI, add components to `src/components/ui/`
 7. For feature-specific components, create `src/components/features/YourFeature/`
-
-## Key Domain Concepts
-
-- **PhonemeResult:** `{ phoneme: string, expected: string, correct: boolean, hint?: string }`. The `PhoneticBreakdown` component renders one chip per result.
-- **EvaluationResponse:** Array of `PhonemeResult` returned by POST `/evaluate`. Drives the color-coded IPA display.
-- **CorrectionHint:** Shown when user clicks a red phoneme chip. Content comes from the backend error map (e.g., `"Sound should be /θ/ as in 'Think', not /f/ as in 'Finger'"`).
-- **Session loop:** `SessionPage` advances through words in a list; failed phonemes are flagged for retry injection.
 
 ## Coding Conventions
 
