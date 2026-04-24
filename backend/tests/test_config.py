@@ -12,7 +12,8 @@ def test_settings_with_all_fields():
     assert settings.clone_dir == "/tmp/custom_clone"
 
 
-def test_settings_clone_dir_has_default():
+def test_settings_clone_dir_has_default(monkeypatch):
+    monkeypatch.delenv("APP_CLONE_DIR", raising=False)
     settings = Settings(
         github_repo_url="https://github.com/org/repo.git",
         github_pat="ghp_test_token_123",
