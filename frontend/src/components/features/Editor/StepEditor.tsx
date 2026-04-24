@@ -12,7 +12,7 @@ export function StepEditor({ step, onChange, onRemove }: StepEditorProps) {
   return (
     <div className="flex items-center gap-2">
       <select
-        className="w-24 rounded bg-zinc-800 px-2 py-1.5 text-sm text-zinc-100 outline-none ring-1 ring-zinc-700"
+        className="w-28 rounded bg-zinc-800 px-3 py-2 text-base text-white outline-none ring-1 ring-zinc-600"
         value={step.keyword}
         onChange={(e) =>
           onChange({ ...step, keyword: e.target.value as Step["keyword"] })
@@ -26,7 +26,7 @@ export function StepEditor({ step, onChange, onRemove }: StepEditorProps) {
       </select>
 
       <input
-        className="flex-1 rounded bg-zinc-800 px-2 py-1.5 text-sm text-zinc-100 outline-none ring-1 ring-zinc-700 placeholder:text-zinc-600"
+        className="flex-1 rounded bg-zinc-800 px-3 py-2 text-base text-white outline-none ring-1 ring-zinc-600 placeholder:text-zinc-500"
         type="text"
         placeholder="Step text..."
         value={step.text}
@@ -34,7 +34,7 @@ export function StepEditor({ step, onChange, onRemove }: StepEditorProps) {
       />
 
       <button
-        className="rounded px-2 py-1 text-xs text-zinc-500 hover:text-red-400"
+        className="rounded px-2 py-1 text-sm text-zinc-400 hover:text-red-400"
         onClick={onRemove}
         type="button"
       >

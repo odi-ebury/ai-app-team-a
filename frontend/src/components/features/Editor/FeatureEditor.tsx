@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
+import { EditableText } from "@/components/ui/EditableText";
 import { ScenarioEditor } from "@/components/features/Editor/ScenarioEditor";
-import { useFeatureFile, useUpdateFile } from "@/services/featureApi";
+import { useFeatureFile, useFileTree, useUpdateFile } from "@/services/featureApi";
 import type { FeatureBody, Scenario } from "@/types";
 
 interface FeatureEditorProps {
@@ -11,9 +12,18 @@ interface FeatureEditorProps {
 
 export function FeatureEditor({ path }: FeatureEditorProps) {
   const { data, isLoading, error } = useFeatureFile(path);
+  const { data: tree } = useFileTree();
   const updateFile = useUpdateFile();
 
+  const initiative = useMemo(() => {
+    if (!tree) return null;
+    const rootFolder = path.split("/")[0];
+    return tree.find((entry) => entry.name === rootFolder) ?? null;
+  }, [tree, path]);
+
   const [form, setForm] = useState<FeatureBody | null>(null);
+  const formRef = useRef(form);
+  formRef.current = form;
 
   useEffect(() => {
     if (data) {
@@ -21,10 +31,17 @@ export function FeatureEditor({ path }: FeatureEditorProps) {
     }
   }, [data]);
 
+  const save = useCallback(
+    (updated: FeatureBody) => {
+      updateFile.mutate({ path, feature: updated });
+    },
+    [path, updateFile],
+  );
+
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-sm text-zinc-500">Loading file...</p>
+        <p className="text-base text-zinc-400">Loading file...</p>
       </div>
     );
   }
@@ -32,7 +49,7 @@ export function FeatureEditor({ path }: FeatureEditorProps) {
   if (error) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-sm text-red-400">
+        <p className="text-base text-red-400">
           Failed to load file: {(error as Error).message}
         </p>
       </div>
@@ -40,6 +57,18 @@ export function FeatureEditor({ path }: FeatureEditorProps) {
   }
 
   if (!form) return null;
+
+  function handleNameChange(name: string) {
+    const updated = { ...formRef.current!, name };
+    setForm(updated);
+    save(updated);
+  }
+
+  function handleDescriptionChange(description: string) {
+    const updated = { ...formRef.current!, description: description || undefined };
+    setForm(updated);
+    save(updated);
+  }
 
   function handleScenarioChange(index: number, scenario: Scenario) {
     setForm((prev) => {
@@ -77,8 +106,15 @@ export function FeatureEditor({ path }: FeatureEditorProps) {
 
   return (
     <div className="flex h-full flex-col overflow-y-auto p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-zinc-100">{path}</h2>
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {initiative && (
+            <>
+              <span className="text-5xl">{initiative.emoji || "📁"}</span>
+              <span className="text-3xl font-bold text-white">{initiative.name}</span>
+            </>
+          )}
+        </div>
         <Button
           onClick={handleSave}
           disabled={updateFile.isPending}
@@ -88,41 +124,32 @@ export function FeatureEditor({ path }: FeatureEditorProps) {
       </div>
 
       {updateFile.isError && (
-        <p className="mb-4 text-sm text-red-400">
+        <p className="mb-4 text-base text-red-400">
           Failed to save: {(updateFile.error as Error).message}
         </p>
       )}
 
+      <div className="mb-6">
+        <EditableText
+          value={form.name}
+          onChange={handleNameChange}
+          placeholder="Click to add feature name..."
+          className="text-2xl font-semibold text-white"
+          inputClassName="text-2xl font-semibold"
+        />
+        <EditableText
+          value={form.description ?? ""}
+          onChange={handleDescriptionChange}
+          placeholder="Click to add description..."
+          multiline
+          className="mt-1 text-base text-zinc-200"
+          inputClassName="text-base"
+        />
+      </div>
+
       <div className="space-y-4">
         <div>
-          <label className="mb-1 block text-xs text-zinc-500">
-            Feature Name
-          </label>
-          <input
-            className="w-full rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-100 outline-none ring-1 ring-zinc-700 placeholder:text-zinc-600"
-            type="text"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs text-zinc-500">
-            Description
-          </label>
-          <textarea
-            className="w-full rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-100 outline-none ring-1 ring-zinc-700 placeholder:text-zinc-600"
-            rows={3}
-            placeholder="Optional description..."
-            value={form.description ?? ""}
-            onChange={(e) =>
-              setForm({ ...form, description: e.target.value || undefined })
-            }
-          />
-        </div>
-
-        <div>
-          <h3 className="mb-3 text-sm font-medium text-zinc-300">Scenarios</h3>
+          <h3 className="mb-3 text-lg font-medium text-zinc-100">Scenarios</h3>
           <div className="space-y-4">
             {form.scenarios.map((scenario, i) => (
               <ScenarioEditor

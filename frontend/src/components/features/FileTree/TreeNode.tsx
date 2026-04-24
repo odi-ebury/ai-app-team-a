@@ -1,12 +1,8 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 import { cn } from "@/lib/utils";
+import { EmojiPicker } from "@/components/ui/EmojiPicker";
 import type { FileTreeEntry } from "@/types";
-
-const EMOJI_OPTIONS = [
-  "🚀", "⭐", "🔥", "💡", "🎯", "📦", "🔒", "💳", "👤", "🛒",
-  "📊", "🔔", "⚙️", "🌍", "💬", "📱", "🏷️", "🎨", "🧪", "📋",
-];
 
 interface TreeNodeProps {
   entry: FileTreeEntry;
@@ -37,7 +33,6 @@ export function TreeNode({
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(entry.name);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
-  const emojiRef = useRef<HTMLButtonElement>(null);
 
   const isFolder = entry.type === "folder";
   const isSelected = !isFolder && entry.path === selectedPath;
@@ -98,7 +93,6 @@ export function TreeNode({
         {isFolder ? (
           <span className="relative">
             <button
-              ref={emojiRef}
               className="text-lg select-none hover:scale-110 transition-transform"
               onClick={(e) => {
                 e.stopPropagation();
@@ -109,22 +103,10 @@ export function TreeNode({
               {entry.emoji || "📁"}
             </button>
             {emojiPickerOpen && (
-              <div
-                className="absolute left-0 top-7 z-50 rounded-lg bg-zinc-800 p-2 shadow-xl ring-1 ring-zinc-600"
-                style={{ display: "grid", gridTemplateColumns: "repeat(5, 36px)", gap: "4px" }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {EMOJI_OPTIONS.map((em) => (
-                  <button
-                    key={em}
-                    className="flex items-center justify-center rounded text-lg hover:bg-zinc-700"
-                    style={{ width: "36px", height: "36px" }}
-                    onClick={() => handleEmojiSelect(em)}
-                  >
-                    {em}
-                  </button>
-                ))}
-              </div>
+              <EmojiPicker
+                onSelect={handleEmojiSelect}
+                onClose={() => setEmojiPickerOpen(false)}
+              />
             )}
           </span>
         ) : (

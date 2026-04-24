@@ -35,14 +35,14 @@ export function ScenarioEditor({
     <div className="rounded-lg border border-zinc-700 p-4">
       <div className="mb-3 flex items-center gap-3">
         <input
-          className="flex-1 rounded bg-zinc-800 px-2 py-1.5 text-sm font-medium text-zinc-100 outline-none ring-1 ring-zinc-700 placeholder:text-zinc-600"
+          className="flex-1 rounded bg-zinc-800 px-3 py-2 text-base font-medium text-white outline-none ring-1 ring-zinc-600 placeholder:text-zinc-500"
           type="text"
           placeholder="Scenario name..."
           value={scenario.name}
           onChange={(e) => onChange({ ...scenario, name: e.target.value })}
         />
         <button
-          className="text-xs text-zinc-500 hover:text-red-400"
+          className="text-sm text-zinc-400 hover:text-red-400"
           onClick={onRemove}
           type="button"
         >
