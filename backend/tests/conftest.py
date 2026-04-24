@@ -1,10 +1,10 @@
 import subprocess
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
-from app.core.config import Settings
+from app.core.config import Settings, get_settings
+from main import app
 
 
 SAMPLE_FEATURE = """\
@@ -38,7 +38,6 @@ def git_repo(tmp_path, override_settings):
     work_dir = tmp_path / "setup_work"
 
     subprocess.run(["git", "init", "--bare", str(bare_repo_path)], check=True, capture_output=True)
-
     subprocess.run(["git", "clone", str(bare_repo_path), str(work_dir)], check=True, capture_output=True)
 
     initiatives = work_dir / "initiatives"
@@ -55,12 +54,21 @@ def git_repo(tmp_path, override_settings):
     subprocess.run(["git", "push", "origin", "master"], cwd=str(work_dir), check=True, capture_output=True)
 
     repo_url = f"file://{bare_repo_path}"
+    test_settings = Settings(
+        github_repo_url=repo_url,
+        github_pat="",
+        clone_dir=str(clone_dir),
+    )
 
-    ctx = override_settings(repo_url, str(clone_dir))
-    with ctx:
+    mock_ctx = override_settings(repo_url, str(clone_dir))
+    app.dependency_overrides[get_settings] = lambda: test_settings
+
+    with mock_ctx:
         yield {
             "bare_repo_path": bare_repo_path,
             "clone_dir": clone_dir,
             "repo_url": repo_url,
             "work_dir": work_dir,
         }
+
+    app.dependency_overrides.clear()
