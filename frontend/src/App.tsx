@@ -66,7 +66,7 @@ function AppLayout() {
           <FeatureEditor path={selectedPath} />
         ) : (
           <div className="flex h-full items-center justify-center">
-            <p className="text-zinc-500">
+            <p className="text-lg text-zinc-400">
               Select a feature file from the sidebar to start editing
             </p>
           </div>

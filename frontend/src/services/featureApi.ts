@@ -9,6 +9,7 @@ import type {
   FileTreeEntry,
   FolderCreate,
   RenameRequest,
+  ReorderRequest,
 } from "@/types";
 
 export function getTree(): Promise<FileTreeEntry[]> {
@@ -71,6 +72,14 @@ export function renameEntry(
 export function deleteEntry(path: string): Promise<unknown> {
   return apiFetch(`/api/v1/features/${path}`, {
     method: "DELETE",
+  });
+}
+
+export function reorderEntries(data: ReorderRequest): Promise<unknown> {
+  return apiFetch("/api/v1/features/reorder", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
   });
 }
 
@@ -153,6 +162,16 @@ export function useDeleteEntry() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteEntry,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["features", "tree"] });
+    },
+  });
+}
+
+export function useReorderEntries() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: reorderEntries,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["features", "tree"] });
     },

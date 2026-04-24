@@ -50,3 +50,8 @@ class RenameRequest(BaseModel):
 
 class EmojiUpdate(BaseModel):
     emoji: str
+
+
+class ReorderRequest(BaseModel):
+    parent_path: str | None = None
+    ordered_names: list[str]

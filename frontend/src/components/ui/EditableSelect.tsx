@@ -38,7 +38,7 @@ export function EditableSelect({
       <select
         ref={selectRef}
         className={cn(
-          "rounded bg-zinc-800 px-2 py-1 text-base font-semibold outline-none ring-1 ring-zinc-600 focus:ring-zinc-400",
+          "rounded bg-zinc-800 px-2 py-1 text-lg font-semibold outline-none ring-1 ring-zinc-600 focus:ring-zinc-400",
           colorClass || "text-white",
         )}
         value={value}

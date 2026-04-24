@@ -44,3 +44,8 @@ export interface RenameRequest {
 export interface EmojiUpdate {
   emoji: string;
 }
+
+export interface ReorderRequest {
+  parent_path: string | null;
+  ordered_names: string[];
+}

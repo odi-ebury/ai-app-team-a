@@ -11,6 +11,7 @@ import {
   useRenameEntry,
   useDeleteEntry,
   useUpdateEmoji,
+  useReorderEntries,
 } from "@/services/featureApi";
 
 interface FileTreeProps {
@@ -38,6 +39,7 @@ export function FileTree({
   const renameEntry = useRenameEntry();
   const deleteEntry = useDeleteEntry();
   const updateEmoji = useUpdateEmoji();
+  const reorderEntries = useReorderEntries();
 
   const [folderModalOpen, setFolderModalOpen] = useState(false);
   const [fileModalOpen, setFileModalOpen] = useState(false);
@@ -140,13 +142,17 @@ export function FileTree({
     updateEmoji.mutate({ path, emoji });
   }
 
+  function handleReorder(parentPath: string | null, orderedNames: string[]) {
+    reorderEntries.mutate({ parent_path: parentPath, ordered_names: orderedNames });
+  }
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-zinc-700 px-4 py-3">
-        <h2 className="text-base font-semibold uppercase tracking-wider text-zinc-100">Initiatives</h2>
+        <h2 className="text-lg font-semibold uppercase tracking-wider text-zinc-100">Initiatives</h2>
         <Button
           variant="ghost"
-          className="text-xs"
+          className="text-base"
           onClick={() => {
             setFolderError("");
             setNewFolderName("");
@@ -159,10 +165,10 @@ export function FileTree({
 
       <div className="flex-1 overflow-y-auto p-2">
         {isLoading && (
-          <p className="px-2 py-4 text-sm text-zinc-500">Loading...</p>
+          <p className="px-2 py-4 text-base text-zinc-400">Loading...</p>
         )}
         {error && (
-          <p className="px-2 py-4 text-sm text-red-400">
+          <p className="px-2 py-4 text-base text-red-400">
             Failed to load tree
           </p>
         )}
@@ -180,6 +186,9 @@ export function FileTree({
               onDelete={(path) => setDeleteTarget(path)}
               onAddFeature={handleAddFeature}
               onUpdateEmoji={handleUpdateEmoji}
+              onReorder={handleReorder}
+              siblings={tree}
+              parentPath={null}
             />
           ))}
       </div>
@@ -190,7 +199,7 @@ export function FileTree({
         title="New Folder"
       >
         <input
-          className="mb-1 w-full rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-100 outline-none ring-1 ring-zinc-700 placeholder:text-zinc-600"
+          className="mb-1 w-full rounded bg-zinc-800 px-3 py-2 text-lg text-zinc-100 outline-none ring-1 ring-zinc-700 placeholder:text-zinc-500"
           placeholder="Folder name..."
           value={newFolderName}
           onChange={(e) => {
@@ -201,7 +210,7 @@ export function FileTree({
           autoFocus
         />
         {folderError && (
-          <p className="mb-3 text-xs text-red-400">{folderError}</p>
+          <p className="mb-3 text-sm text-red-400">{folderError}</p>
         )}
         <div className="mt-4 flex justify-end gap-3">
           <Button variant="ghost" onClick={() => setFolderModalOpen(false)}>
@@ -219,7 +228,7 @@ export function FileTree({
         title="New Feature"
       >
         <input
-          className="mb-1 w-full rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-100 outline-none ring-1 ring-zinc-700 placeholder:text-zinc-600"
+          className="mb-1 w-full rounded bg-zinc-800 px-3 py-2 text-lg text-zinc-100 outline-none ring-1 ring-zinc-700 placeholder:text-zinc-500"
           placeholder="Feature name (e.g. User Login)..."
           value={newFeatureName}
           onChange={(e) => {
@@ -230,7 +239,7 @@ export function FileTree({
           autoFocus
         />
         {fileError && (
-          <p className="mb-3 text-xs text-red-400">{fileError}</p>
+          <p className="mb-3 text-sm text-red-400">{fileError}</p>
         )}
         <div className="mt-4 flex justify-end gap-3">
           <Button variant="ghost" onClick={() => setFileModalOpen(false)}>

@@ -27,7 +27,7 @@ export function StepEditor({ step, onChange, onRemove }: StepEditorProps) {
         onChange={(keyword) =>
           onChange({ ...step, keyword: keyword as Step["keyword"] })
         }
-        className="text-base font-semibold"
+        className="text-lg font-semibold"
         colorMap={KEYWORD_COLORS}
       />
 
@@ -36,13 +36,13 @@ export function StepEditor({ step, onChange, onRemove }: StepEditorProps) {
           value={step.text}
           onChange={(text) => onChange({ ...step, text })}
           placeholder="Click to add step text..."
-          className="text-base text-zinc-200"
-          inputClassName="text-base"
+          className="text-lg text-zinc-200"
+          inputClassName="text-lg"
         />
       </div>
 
       <button
-        className="rounded px-2 py-1 text-sm text-red-400 opacity-0 group-hover/step:opacity-100 transition-opacity hover:text-red-300"
+        className="rounded px-2 py-1 text-base text-red-400 opacity-0 group-hover/step:opacity-100 transition-opacity hover:text-red-300"
         onClick={onRemove}
         type="button"
       >

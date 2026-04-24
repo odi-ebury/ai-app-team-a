@@ -41,7 +41,7 @@ export function FeatureEditor({ path }: FeatureEditorProps) {
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-base text-zinc-400">Loading file...</p>
+        <p className="text-lg text-zinc-400">Loading file...</p>
       </div>
     );
   }
@@ -49,7 +49,7 @@ export function FeatureEditor({ path }: FeatureEditorProps) {
   if (error) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-base text-red-400">
+        <p className="text-lg text-red-400">
           Failed to load file: {(error as Error).message}
         </p>
       </div>
@@ -110,10 +110,10 @@ export function FeatureEditor({ path }: FeatureEditorProps) {
           )}
         </div>
         {updateFile.isPending && (
-          <p className="text-sm text-zinc-400">Saving...</p>
+          <p className="text-base text-zinc-400">Saving...</p>
         )}
         {updateFile.isError && (
-          <p className="text-sm text-red-400">
+          <p className="text-base text-red-400">
             Failed to save: {(updateFile.error as Error).message}
           </p>
         )}
@@ -124,22 +124,22 @@ export function FeatureEditor({ path }: FeatureEditorProps) {
           value={form.name}
           onChange={handleNameChange}
           placeholder="Click to add feature name..."
-          className="text-2xl font-semibold text-white"
-          inputClassName="text-2xl font-semibold"
+          className="text-2xl font-bold text-white"
+          inputClassName="text-2xl font-bold"
         />
         <EditableText
           value={form.description ?? ""}
           onChange={handleDescriptionChange}
           placeholder="Click to add description..."
           multiline
-          className="mt-1 text-base text-zinc-200"
-          inputClassName="text-base"
+          className="mt-1 text-lg text-zinc-200"
+          inputClassName="text-lg"
         />
       </div>
 
       <div className="space-y-4">
         <div>
-          <h3 className="mb-3 text-lg font-medium text-zinc-100">Scenarios</h3>
+          <h3 className="mb-3 text-xl font-medium text-zinc-100">Scenarios</h3>
           <div className="space-y-4">
             {form.scenarios.map((scenario, i) => (
               <ScenarioEditor
@@ -152,7 +152,7 @@ export function FeatureEditor({ path }: FeatureEditorProps) {
           </div>
           <Button
             variant="ghost"
-            className="mt-4 text-xs"
+            className="mt-4"
             onClick={handleAddScenario}
             type="button"
           >

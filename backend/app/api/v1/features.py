@@ -11,6 +11,7 @@ from app.schemas.feature import (
     FileTreeEntry,
     FolderCreate,
     RenameRequest,
+    ReorderRequest,
 )
 from app.services import file_service, git_service
 
@@ -61,6 +62,19 @@ async def create_file(data: FileCreate, clone_dir: CloneDir):
 async def update_file(path: str, feature: FeatureBody, clone_dir: CloneDir):
     try:
         await file_service.update_file(clone_dir, path, feature)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return {"ok": True}
+
+
+@router.patch("/reorder")
+async def reorder_entries(data: ReorderRequest, clone_dir: CloneDir):
+    try:
+        await file_service.reorder_children(
+            clone_dir, data.parent_path, data.ordered_names
+        )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except FileNotFoundError as e:

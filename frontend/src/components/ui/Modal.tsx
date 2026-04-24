@@ -29,7 +29,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         className="w-full max-w-md rounded-lg bg-zinc-900 p-6 shadow-xl ring-1 ring-zinc-700"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="mb-4 text-lg font-semibold text-zinc-100">{title}</h2>
+        <h2 className="mb-4 text-xl font-semibold text-zinc-100">{title}</h2>
         {children}
       </div>
     </div>

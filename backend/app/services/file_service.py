@@ -29,26 +29,34 @@ def _read_meta(folder: Path) -> dict:
     return {}
 
 
+def _write_meta(folder: Path, meta: dict) -> None:
+    (folder / _META_FILE).write_text(json.dumps(meta))
+
+
 def _build_tree(base: Path, rel: Path | None = None) -> list[FileTreeEntry]:
     entries: list[FileTreeEntry] = []
     current = base if rel is None else base / rel
+    meta = _read_meta(current)
+    order: list[str] = meta.get("order", [])
 
-    for item in sorted(current.iterdir()):
-        if item.name in _EXCLUDED_NAMES:
-            continue
+    items = [i for i in current.iterdir() if i.name not in _EXCLUDED_NAMES]
 
+    order_index = {name: idx for idx, name in enumerate(order)}
+    items.sort(key=lambda i: (order_index.get(i.name, len(order)), i.name))
+
+    for item in items:
         item_rel = item.relative_to(base)
 
         if item.is_dir():
             children = _build_tree(base, item_rel)
-            meta = _read_meta(item)
+            child_meta = _read_meta(item)
             entries.append(
                 FileTreeEntry(
                     name=item.name,
                     type="folder",
                     path=str(item_rel),
                     children=children,
-                    emoji=meta.get("emoji"),
+                    emoji=child_meta.get("emoji"),
                 )
             )
         else:
@@ -122,8 +130,28 @@ async def update_emoji(clone_dir: str, path: str, emoji: str) -> None:
         raise FileNotFoundError(f"Folder not found: {path}")
     meta = _read_meta(folder_path)
     meta["emoji"] = emoji
-    (folder_path / _META_FILE).write_text(json.dumps(meta))
+    _write_meta(folder_path, meta)
     await git_service.commit_and_push(clone_dir, f"Update emoji for {path}")
+
+
+async def reorder_children(
+    clone_dir: str, parent_path: str | None, ordered_names: list[str]
+) -> None:
+    initiatives = Path(clone_dir) / "initiatives"
+    if parent_path:
+        validate_path(parent_path)
+        folder = initiatives / parent_path
+    else:
+        folder = initiatives
+    if not folder.is_dir():
+        raise FileNotFoundError(
+            f"Folder not found: {parent_path or 'initiatives'}"
+        )
+    meta = _read_meta(folder)
+    meta["order"] = ordered_names
+    _write_meta(folder, meta)
+    label = parent_path or "root"
+    await git_service.commit_and_push(clone_dir, f"Reorder children in {label}")
 
 
 async def rename_entry(clone_dir: str, path: str, new_name: str) -> None:
