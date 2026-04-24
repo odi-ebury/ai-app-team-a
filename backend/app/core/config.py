@@ -4,7 +4,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    database_url: str = "sqlite+aiosqlite:///./app.db"
+    github_repo_url: str
+    github_pat: str
+    clone_dir: str = "./repo_clone"
 
     model_config = SettingsConfigDict(env_prefix="APP_")
 
