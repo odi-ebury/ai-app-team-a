@@ -125,7 +125,13 @@ export function TreeNode({
           />
         ) : (
           <>
-            <span className="flex-1 truncate">
+            <span
+              className="flex-1 truncate"
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                handleRenameStart();
+              }}
+            >
               {isFolder ? entry.name : (entry.feature_name || entry.name.replace(/\.feature$/, ""))}
             </span>
             <span
@@ -134,21 +140,14 @@ export function TreeNode({
             >
               {isFolder && (
                 <button
-                  className="rounded px-1 text-base text-emerald-400 hover:text-emerald-300"
+                  className="rounded-md border border-zinc-600 px-2 py-0.5 text-xs font-medium text-zinc-300 hover:border-zinc-500 hover:bg-zinc-700 hover:text-white transition-colors"
                   onClick={() => onAddFeature(entry.path)}
-                  title="Add feature"
                 >
-                  ＋
+                  Add Feature
                 </button>
               )}
               <button
-                className="rounded px-1 text-base text-zinc-400 hover:text-zinc-200"
-                onClick={handleRenameStart}
-              >
-                ✎
-              </button>
-              <button
-                className="rounded px-1 text-base text-red-400 hover:text-red-300"
+                className="rounded px-1 text-base text-red-400 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-300"
                 onClick={() => onDelete(entry.path)}
               >
                 ✕
@@ -158,9 +157,9 @@ export function TreeNode({
         )}
       </div>
 
-      {isFolder && isExpanded && entry.children && (
+      {isFolder && isExpanded && (
         <div>
-          {entry.children.map((child) => (
+          {entry.children?.map((child) => (
             <TreeNode
               key={child.path}
               entry={child}

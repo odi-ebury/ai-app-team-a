@@ -71,37 +71,31 @@ export function FeatureEditor({ path }: FeatureEditorProps) {
   }
 
   function handleScenarioChange(index: number, scenario: Scenario) {
-    setForm((prev) => {
-      if (!prev) return prev;
-      const scenarios = [...prev.scenarios];
-      scenarios[index] = scenario;
-      return { ...prev, scenarios };
-    });
+    const updated = { ...formRef.current!, scenarios: [...formRef.current!.scenarios] };
+    updated.scenarios[index] = scenario;
+    setForm(updated);
+    save(updated);
   }
 
   function handleScenarioRemove(index: number) {
-    setForm((prev) => {
-      if (!prev) return prev;
-      return { ...prev, scenarios: prev.scenarios.filter((_, i) => i !== index) };
-    });
+    const updated = {
+      ...formRef.current!,
+      scenarios: formRef.current!.scenarios.filter((_, i) => i !== index),
+    };
+    setForm(updated);
+    save(updated);
   }
 
   function handleAddScenario() {
-    setForm((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        scenarios: [
-          ...prev.scenarios,
-          { name: "", steps: [{ keyword: "Given" as const, text: "" }] },
-        ],
-      };
-    });
-  }
-
-  function handleSave() {
-    if (!form) return;
-    updateFile.mutate({ path, feature: form });
+    const updated = {
+      ...formRef.current!,
+      scenarios: [
+        ...formRef.current!.scenarios,
+        { name: "" as string, steps: [{ keyword: "Given" as const, text: "" }] },
+      ],
+    };
+    setForm(updated);
+    save(updated);
   }
 
   return (
@@ -115,19 +109,15 @@ export function FeatureEditor({ path }: FeatureEditorProps) {
             </>
           )}
         </div>
-        <Button
-          onClick={handleSave}
-          disabled={updateFile.isPending}
-        >
-          {updateFile.isPending ? "Saving..." : "Save"}
-        </Button>
+        {updateFile.isPending && (
+          <p className="text-sm text-zinc-400">Saving...</p>
+        )}
+        {updateFile.isError && (
+          <p className="text-sm text-red-400">
+            Failed to save: {(updateFile.error as Error).message}
+          </p>
+        )}
       </div>
-
-      {updateFile.isError && (
-        <p className="mb-4 text-base text-red-400">
-          Failed to save: {(updateFile.error as Error).message}
-        </p>
-      )}
 
       <div className="mb-6">
         <EditableText

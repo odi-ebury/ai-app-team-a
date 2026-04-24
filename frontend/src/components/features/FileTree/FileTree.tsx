@@ -142,7 +142,8 @@ export function FileTree({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-2 border-b border-zinc-700 p-3">
+      <div className="flex items-center justify-between border-b border-zinc-700 px-4 py-3">
+        <h2 className="text-base font-semibold uppercase tracking-wider text-zinc-100">Initiatives</h2>
         <Button
           variant="ghost"
           className="text-xs"
@@ -152,7 +153,7 @@ export function FileTree({
             setFolderModalOpen(true);
           }}
         >
-          + Add Initiative
+          +
         </Button>
       </div>
 

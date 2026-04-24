@@ -1,6 +1,16 @@
+import { EditableText } from "@/components/ui/EditableText";
+import { EditableSelect } from "@/components/ui/EditableSelect";
 import type { Step } from "@/types";
 
 const KEYWORDS = ["Given", "When", "Then", "And", "But"] as const;
+
+const KEYWORD_COLORS: Record<string, string> = {
+  Given: "text-blue-400",
+  When: "text-amber-400",
+  Then: "text-emerald-400",
+  And: "text-purple-400",
+  But: "text-rose-400",
+};
 
 interface StepEditorProps {
   step: Step;
@@ -10,31 +20,29 @@ interface StepEditorProps {
 
 export function StepEditor({ step, onChange, onRemove }: StepEditorProps) {
   return (
-    <div className="flex items-center gap-2">
-      <select
-        className="w-28 rounded bg-zinc-800 px-3 py-2 text-base text-white outline-none ring-1 ring-zinc-600"
+    <div className="group/step flex items-center gap-2">
+      <EditableSelect
         value={step.keyword}
-        onChange={(e) =>
-          onChange({ ...step, keyword: e.target.value as Step["keyword"] })
+        options={KEYWORDS as unknown as string[]}
+        onChange={(keyword) =>
+          onChange({ ...step, keyword: keyword as Step["keyword"] })
         }
-      >
-        {KEYWORDS.map((kw) => (
-          <option key={kw} value={kw}>
-            {kw}
-          </option>
-        ))}
-      </select>
-
-      <input
-        className="flex-1 rounded bg-zinc-800 px-3 py-2 text-base text-white outline-none ring-1 ring-zinc-600 placeholder:text-zinc-500"
-        type="text"
-        placeholder="Step text..."
-        value={step.text}
-        onChange={(e) => onChange({ ...step, text: e.target.value })}
+        className="text-base font-semibold"
+        colorMap={KEYWORD_COLORS}
       />
 
+      <div className="flex-1">
+        <EditableText
+          value={step.text}
+          onChange={(text) => onChange({ ...step, text })}
+          placeholder="Click to add step text..."
+          className="text-base text-zinc-200"
+          inputClassName="text-base"
+        />
+      </div>
+
       <button
-        className="rounded px-2 py-1 text-sm text-zinc-400 hover:text-red-400"
+        className="rounded px-2 py-1 text-sm text-red-400 opacity-0 group-hover/step:opacity-100 transition-opacity hover:text-red-300"
         onClick={onRemove}
         type="button"
       >

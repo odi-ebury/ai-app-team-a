@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/Button";
+import { EditableText } from "@/components/ui/EditableText";
 import { StepEditor } from "@/components/features/Editor/StepEditor";
 import type { Scenario, Step } from "@/types";
 
@@ -32,17 +33,19 @@ export function ScenarioEditor({
   }
 
   return (
-    <div className="rounded-lg border border-zinc-700 p-4">
+    <div className="group/scenario rounded-lg border border-zinc-700 p-4">
       <div className="mb-3 flex items-center gap-3">
-        <input
-          className="flex-1 rounded bg-zinc-800 px-3 py-2 text-base font-medium text-white outline-none ring-1 ring-zinc-600 placeholder:text-zinc-500"
-          type="text"
-          placeholder="Scenario name..."
-          value={scenario.name}
-          onChange={(e) => onChange({ ...scenario, name: e.target.value })}
-        />
+        <div className="flex-1">
+          <EditableText
+            value={scenario.name}
+            onChange={(name) => onChange({ ...scenario, name })}
+            placeholder="Click to add scenario name..."
+            className="text-base font-medium text-white"
+            inputClassName="text-base font-medium"
+          />
+        </div>
         <button
-          className="text-sm text-zinc-400 hover:text-red-400"
+          className="text-sm text-red-400 opacity-0 group-hover/scenario:opacity-100 transition-opacity hover:text-red-300"
           onClick={onRemove}
           type="button"
         >
