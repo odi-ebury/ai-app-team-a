@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router";
-import { HomePage } from "@/pages/HomePage";
+import { BrowserRouter } from "react-router";
 
 const queryClient = new QueryClient();
 
@@ -8,9 +7,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-        </Routes>
+        <div>Gherkin Manager</div>
       </BrowserRouter>
     </QueryClientProvider>
   );

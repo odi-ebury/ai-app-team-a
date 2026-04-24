@@ -14,3 +14,6 @@ services:
       # Add any necessary environment variables for the application
       PYTHONUNBUFFERED: 1
       VITE_API_URL: http://localhost:8000 # Frontend will use this to connect to backend
+      APP_GITHUB_REPO_URL: ${APP_GITHUB_REPO_URL:-}
+      APP_GITHUB_PAT: ${APP_GITHUB_PAT:-}
+      APP_CLONE_DIR: /tmp/repo_clone
