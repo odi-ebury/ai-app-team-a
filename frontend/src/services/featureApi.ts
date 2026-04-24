@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiFetch } from "@/services/api";
 import type {
+  EmojiUpdate,
   FeatureBody,
   FeatureFile,
   FileCreate,
@@ -42,6 +43,17 @@ export function updateFile(
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(feature),
+  });
+}
+
+export function updateEmoji(
+  path: string,
+  data: EmojiUpdate
+): Promise<unknown> {
+  return apiFetch(`/api/v1/features/${path}/emoji`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
   });
 }
 
@@ -97,6 +109,17 @@ export function useCreateFile() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createFile,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["features", "tree"] });
+    },
+  });
+}
+
+export function useUpdateEmoji() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ path, emoji }: { path: string; emoji: string }) =>
+      updateEmoji(path, { emoji }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["features", "tree"] });
     },

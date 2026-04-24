@@ -5,6 +5,7 @@ from urllib.parse import urlparse, urlunparse
 import git
 
 _write_lock = asyncio.Lock()
+_auth_url: str | None = None
 
 
 def _inject_pat(repo_url: str, pat: str) -> str:
@@ -19,27 +20,44 @@ def _inject_pat(repo_url: str, pat: str) -> str:
     return repo_url
 
 
+def _current_branch(repo: git.Repo) -> str:
+    return repo.active_branch.name
+
+
 def _clone_sync(repo_url: str, clone_dir: str, pat: str) -> None:
-    auth_url = _inject_pat(repo_url, pat)
+    global _auth_url
+    _auth_url = _inject_pat(repo_url, pat)
     clone_path = Path(clone_dir)
 
     if clone_path.exists():
         repo = git.Repo(clone_dir)
-        repo.remotes.origin.pull()
+        branch = _current_branch(repo)
+        if _auth_url:
+            repo.git.pull(_auth_url, branch)
+        else:
+            repo.remotes.origin.pull()
     else:
-        git.Repo.clone_from(auth_url, clone_dir)
+        git.Repo.clone_from(_auth_url, clone_dir)
 
 
 def _pull_sync(clone_dir: str) -> None:
     repo = git.Repo(clone_dir)
-    repo.remotes.origin.pull()
+    branch = _current_branch(repo)
+    if _auth_url:
+        repo.git.pull(_auth_url, branch)
+    else:
+        repo.remotes.origin.pull()
 
 
 def _commit_and_push_sync(clone_dir: str, message: str) -> None:
     repo = git.Repo(clone_dir)
     repo.git.add("-A")
     repo.index.commit(message, author=git.Actor("Gherkin Manager", "gherkin@manager.app"))
-    repo.remotes.origin.push()
+    branch = _current_branch(repo)
+    if _auth_url:
+        repo.git.push(_auth_url, branch)
+    else:
+        repo.remotes.origin.push()
 
 
 async def clone_repo(repo_url: str, clone_dir: str, pat: str) -> None:

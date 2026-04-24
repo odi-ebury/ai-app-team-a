@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.core.config import Settings, get_settings
 from app.schemas.feature import (
+    EmojiUpdate,
     FeatureBody,
     FeatureFile,
     FileCreate,
@@ -60,6 +61,17 @@ async def create_file(data: FileCreate, clone_dir: CloneDir):
 async def update_file(path: str, feature: FeatureBody, clone_dir: CloneDir):
     try:
         await file_service.update_file(clone_dir, path, feature)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return {"ok": True}
+
+
+@router.patch("/{path:path}/emoji")
+async def update_emoji(path: str, data: EmojiUpdate, clone_dir: CloneDir):
+    try:
+        await file_service.update_emoji(clone_dir, path, data.emoji)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except FileNotFoundError as e:

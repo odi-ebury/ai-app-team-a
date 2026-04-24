@@ -10,7 +10,7 @@ import {
   useCreateFile,
   useRenameEntry,
   useDeleteEntry,
-  useSyncRepo,
+  useUpdateEmoji,
 } from "@/services/featureApi";
 
 interface FileTreeProps {
@@ -18,31 +18,35 @@ interface FileTreeProps {
   onSelectFile: (path: string) => void;
   onSelectedRenamed: (newPath: string) => void;
   onSelectedDeleted: () => void;
+  selectedFolder: string | null;
+  onSelectFolder: (path: string | null) => void;
 }
 
-const VALID_NAME = /^[\w\-.]+$/;
+const VALID_NAME = /^[\w\- .]+$/;
 
 export function FileTree({
   selectedPath,
   onSelectFile,
   onSelectedRenamed,
   onSelectedDeleted,
+  selectedFolder,
+  onSelectFolder,
 }: FileTreeProps) {
   const { data: tree, isLoading, error } = useFileTree();
   const createFolder = useCreateFolder();
   const createFile = useCreateFile();
   const renameEntry = useRenameEntry();
   const deleteEntry = useDeleteEntry();
-  const syncRepo = useSyncRepo();
+  const updateEmoji = useUpdateEmoji();
 
   const [folderModalOpen, setFolderModalOpen] = useState(false);
   const [fileModalOpen, setFileModalOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
-  const [newFileName, setNewFileName] = useState("");
   const [newFeatureName, setNewFeatureName] = useState("");
   const [folderError, setFolderError] = useState("");
   const [fileError, setFileError] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [targetFolder, setTargetFolder] = useState<string | null>(null);
 
   function handleCreateFolder() {
     const trimmed = newFolderName.trim();
@@ -66,27 +70,30 @@ export function FileTree({
     );
   }
 
+  function toKebabCase(name: string): string {
+    return name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
   function handleCreateFile() {
-    const trimmed = newFileName.trim();
     const featureName = newFeatureName.trim();
-    if (!trimmed) {
+    if (!featureName) {
       setFileError("Name cannot be empty");
       return;
     }
-    if (!VALID_NAME.test(trimmed)) {
-      setFileError("Only letters, numbers, hyphens, underscores, and dots");
-      return;
-    }
-    const path = trimmed.endsWith(".feature") ? trimmed : `${trimmed}.feature`;
+    const fileName = `${toKebabCase(featureName)}.feature`;
+    const path = targetFolder ? `${targetFolder}/${fileName}` : fileName;
     createFile.mutate(
       {
         path,
-        feature: { name: featureName || path, scenarios: [] },
+        feature: { name: featureName, scenarios: [] },
       },
       {
         onSuccess: () => {
           setFileModalOpen(false);
-          setNewFileName("");
           setNewFeatureName("");
           setFileError("");
         },
@@ -122,6 +129,17 @@ export function FileTree({
     setDeleteTarget(null);
   }
 
+  function handleAddFeature(folderPath: string) {
+    setTargetFolder(folderPath);
+    setFileError("");
+    setNewFeatureName("");
+    setFileModalOpen(true);
+  }
+
+  function handleUpdateEmoji(path: string, emoji: string) {
+    updateEmoji.mutate({ path, emoji });
+  }
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2 border-b border-zinc-700 p-3">
@@ -134,27 +152,7 @@ export function FileTree({
             setFolderModalOpen(true);
           }}
         >
-          + Folder
-        </Button>
-        <Button
-          variant="ghost"
-          className="text-xs"
-          onClick={() => {
-            setFileError("");
-            setNewFileName("");
-            setNewFeatureName("");
-            setFileModalOpen(true);
-          }}
-        >
-          + File
-        </Button>
-        <Button
-          variant="ghost"
-          className="ml-auto text-xs"
-          onClick={() => syncRepo.mutate()}
-          disabled={syncRepo.isPending}
-        >
-          {syncRepo.isPending ? "Syncing..." : "Sync"}
+          + Add Initiative
         </Button>
       </div>
 
@@ -174,9 +172,13 @@ export function FileTree({
               entry={entry}
               depth={0}
               selectedPath={selectedPath}
+              selectedFolder={selectedFolder}
               onSelectFile={onSelectFile}
+              onSelectFolder={onSelectFolder}
               onRename={handleRename}
               onDelete={(path) => setDeleteTarget(path)}
+              onAddFeature={handleAddFeature}
+              onUpdateEmoji={handleUpdateEmoji}
             />
           ))}
       </div>
@@ -213,25 +215,18 @@ export function FileTree({
       <Modal
         isOpen={fileModalOpen}
         onClose={() => setFileModalOpen(false)}
-        title="New Feature File"
+        title="New Feature"
       >
         <input
-          className="mb-3 w-full rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-100 outline-none ring-1 ring-zinc-700 placeholder:text-zinc-600"
-          placeholder="File name (e.g. login.feature)..."
-          value={newFileName}
+          className="mb-1 w-full rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-100 outline-none ring-1 ring-zinc-700 placeholder:text-zinc-600"
+          placeholder="Feature name (e.g. User Login)..."
+          value={newFeatureName}
           onChange={(e) => {
-            setNewFileName(e.target.value);
+            setNewFeatureName(e.target.value);
             setFileError("");
           }}
           onKeyDown={(e) => e.key === "Enter" && handleCreateFile()}
           autoFocus
-        />
-        <input
-          className="mb-1 w-full rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-100 outline-none ring-1 ring-zinc-700 placeholder:text-zinc-600"
-          placeholder="Feature name..."
-          value={newFeatureName}
-          onChange={(e) => setNewFeatureName(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleCreateFile()}
         />
         {fileError && (
           <p className="mb-3 text-xs text-red-400">{fileError}</p>

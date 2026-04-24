@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 from pathlib import Path
@@ -5,7 +6,8 @@ from pathlib import Path
 from app.schemas.feature import FeatureBody, FeatureFile, FileTreeEntry
 from app.services import gherkin_service, git_service
 
-_EXCLUDED_NAMES = {".git", "glossary.md"}
+_EXCLUDED_NAMES = {".git", ".gitkeep", ".meta.json", "glossary.md"}
+_META_FILE = ".meta.json"
 
 
 def validate_path(path: str) -> None:
@@ -15,6 +17,16 @@ def validate_path(path: str) -> None:
         raise ValueError(f"Path traversal is not allowed: {path}")
     if path.startswith(".git") or "/.git" in path:
         raise ValueError(f"Access to .git is not allowed: {path}")
+
+
+def _read_meta(folder: Path) -> dict:
+    meta_path = folder / _META_FILE
+    if meta_path.is_file():
+        try:
+            return json.loads(meta_path.read_text())
+        except Exception:
+            pass
+    return {}
 
 
 def _build_tree(base: Path, rel: Path | None = None) -> list[FileTreeEntry]:
@@ -29,20 +41,30 @@ def _build_tree(base: Path, rel: Path | None = None) -> list[FileTreeEntry]:
 
         if item.is_dir():
             children = _build_tree(base, item_rel)
+            meta = _read_meta(item)
             entries.append(
                 FileTreeEntry(
                     name=item.name,
                     type="folder",
                     path=str(item_rel),
                     children=children,
+                    emoji=meta.get("emoji"),
                 )
             )
         else:
+            feature_name = None
+            if item.suffix == ".feature":
+                try:
+                    parsed = gherkin_service.parse_feature(item.read_text())
+                    feature_name = parsed.name
+                except Exception:
+                    pass
             entries.append(
                 FileTreeEntry(
                     name=item.name,
                     type="file",
                     path=str(item_rel),
+                    feature_name=feature_name,
                 )
             )
 
@@ -91,6 +113,17 @@ async def update_file(clone_dir: str, path: str, feature: FeatureBody) -> None:
     text = gherkin_service.serialize_feature(feature)
     file_path.write_text(text)
     await git_service.commit_and_push(clone_dir, f"Update file {path}")
+
+
+async def update_emoji(clone_dir: str, path: str, emoji: str) -> None:
+    validate_path(path)
+    folder_path = Path(clone_dir) / "initiatives" / path
+    if not folder_path.is_dir():
+        raise FileNotFoundError(f"Folder not found: {path}")
+    meta = _read_meta(folder_path)
+    meta["emoji"] = emoji
+    (folder_path / _META_FILE).write_text(json.dumps(meta))
+    await git_service.commit_and_push(clone_dir, f"Update emoji for {path}")
 
 
 async def rename_entry(clone_dir: str, path: str, new_name: str) -> None:

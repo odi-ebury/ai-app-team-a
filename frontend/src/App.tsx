@@ -9,6 +9,7 @@ const queryClient = new QueryClient();
 
 function AppLayout() {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
 
   return (
     <div className="flex h-screen">
@@ -18,6 +19,8 @@ function AppLayout() {
           onSelectFile={setSelectedPath}
           onSelectedRenamed={setSelectedPath}
           onSelectedDeleted={() => setSelectedPath(null)}
+          selectedFolder={selectedFolder}
+          onSelectFolder={setSelectedFolder}
         />
       </aside>
 

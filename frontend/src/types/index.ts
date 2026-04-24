@@ -24,6 +24,8 @@ export interface FileTreeEntry {
   type: "file" | "folder";
   path: string;
   children?: FileTreeEntry[];
+  feature_name?: string;
+  emoji?: string;
 }
 
 export interface FolderCreate {
@@ -37,4 +39,8 @@ export interface FileCreate {
 
 export interface RenameRequest {
   new_name: string;
+}
+
+export interface EmojiUpdate {
+  emoji: string;
 }

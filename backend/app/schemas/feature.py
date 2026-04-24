@@ -31,6 +31,8 @@ class FileTreeEntry(BaseModel):
     type: Literal["file", "folder"]
     path: str
     children: list[FileTreeEntry] | None = None
+    feature_name: str | None = None
+    emoji: str | None = None
 
 
 class FolderCreate(BaseModel):
@@ -44,3 +46,7 @@ class FileCreate(BaseModel):
 
 class RenameRequest(BaseModel):
     new_name: str
+
+
+class EmojiUpdate(BaseModel):
+    emoji: str
